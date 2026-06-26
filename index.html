@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayApp+ · Demo sin inicio de sesión</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <div class="logo">PayApp+</div>
+    <div class="nav-links">
+      <span id="navHint" style="font-size:0.88rem;color:var(--muted);">Demo estática · sin servidor</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ GATE (selector de vista) ============ -->
+<div id="gateScreen">
+  <section class="hero">
+    <div class="container">
+      <span class="badge">Sin inicio de sesión</span>
+      <h1>Elige cómo quieres<br>explorar PayApp+</h1>
+      <p>Esta versión corre completamente en tu navegador, sin servidor ni base de datos real. Los datos se guardan en este dispositivo para que puedas seguir probando entre visitas.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="gate-options">
+        <button class="card gate-card" onclick="enterApp('cliente')">
+          <span class="tag">Vista 01</span>
+          <h3>Ver como Usuario</h3>
+          <p>Saldo, transferencias entre cuentas, pago de servicios, historial y gráficas de movimientos.</p>
+          <span class="arrow">Entrar →</span>
+        </button>
+        <button class="card gate-card" onclick="enterApp('admin')">
+          <span class="tag">Vista 02</span>
+          <h3>Ver como Administrador</h3>
+          <p>Usuarios registrados, transacciones globales, asignación de saldo y control de cuentas.</p>
+          <span class="arrow">Entrar →</span>
+        </button>
+      </div>
+      <p style="text-align:center;margin-top:28px;font-size:0.85rem;color:var(--muted);">
+        ¿Quieres empezar de cero? <button class="btn btn-secondary btn-small" onclick="resetAllData()">Restablecer datos de ejemplo</button>
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- ============ APP (dashboard) ============ -->
+<div id="appScreen">
+  <div class="scrim" id="scrim" onclick="toggleSidebar(false)"></div>
+  <div class="app-layout">
+
+    <aside class="app-sidebar" id="sidebar">
+      <div class="logo">PayApp+</div>
+      <div class="role-tag" id="sbRoleLabel">Vista usuario</div>
+
+      <nav class="sb-nav" id="navCliente">
+        <button class="sb-link" data-view="dashboard" onclick="showView('dashboard')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          Resumen
+        </button>
+        <button class="sb-link" data-view="transferencias" onclick="showView('transferencias')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 10l5-5 5 5M12 5v14"/></svg>
+          Transferencias
+        </button>
+        <button class="sb-link" data-view="pagos" onclick="showView('pagos')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Pagar servicios
+        </button>
+        <button class="sb-link" data-view="movimientos" onclick="showView('movimientos')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          Movimientos
+        </button>
+      </nav>
+
+      <nav class="sb-nav" id="navAdmin" style="display:none;">
+        <button class="sb-link" data-view="admin-resumen" onclick="showView('admin-resumen')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          Resumen
+        </button>
+        <button class="sb-link" data-view="admin-usuarios" onclick="showView('admin-usuarios')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="7" r="3.2"/><path d="M2 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5M16.5 10.2c1.7.4 3 1.5 3 3.5M16 4.3c1.5.4 2.5 1.6 2.5 3.2"/></svg>
+          Usuarios
+        </button>
+        <button class="sb-link" data-view="admin-transacciones" onclick="showView('admin-transacciones')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 10l5-5 5 5M12 5v14"/></svg>
+          Transacciones
+        </button>
+        <button class="sb-link" data-view="admin-saldo" onclick="showView('admin-saldo')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.5 1.3-2.3 3-2.3s3 .9 3 2.1c0 2.8-6 1.4-6 4.2 0 1.3 1.3 2.2 3 2.2s3-.8 3-2.2"/></svg>
+          Asignar saldo
+        </button>
+      </nav>
+
+      <div class="sb-foot">
+        <div class="sb-switch">Estás viendo como <strong id="sbRoleStrong">cliente</strong></div>
+        <button class="sb-exit" onclick="exitToGate()">← Cambiar de vista</button>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <button class="menu-toggle" onclick="toggleSidebar(true)">☰ Menú</button>
+
+      <!-- ===== DASHBOARD CLIENTE ===== -->
+      <section class="view" id="view-dashboard">
+        <div class="app-topbar">
+          <div>
+            <h1>Hola, <span id="userNombre">Usuario Demo</span></h1>
+            <div class="meta" id="userFecha">—</div>
+          </div>
+          <span class="badge">Datos de ejemplo</span>
+        </div>
+
+        <div class="accounts-row" id="accountsRow"></div>
+
+        <div class="grid-3" style="margin-top:20px;">
+          <div class="card stat-card">
+            <div class="label">Saldo disponible</div>
+            <div class="value pos" id="statSaldo">$0.00</div>
+            <div class="sub">Cuenta de débito principal</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Ingresos del mes</div>
+            <div class="value pos" id="statIngresos">$0.00</div>
+            <div class="sub" id="statIngresosCount">0 movimientos</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Gastos del mes</div>
+            <div class="value neg" id="statGastos">$0.00</div>
+            <div class="sub" id="statGastosCount">0 movimientos</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <h3>Movimientos — últimos 7 días</h3>
+          <div class="chart-wrap"><canvas id="chartMovimientos"></canvas></div>
+        </div>
+
+        <div class="app-section-title">Últimos movimientos <button class="btn-small" onclick="showView('movimientos')">Ver todos →</button></div>
+        <div class="table-card">
+          <div class="table-wrap">
+            <table id="tablaRecientes"><thead><tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th style="text-align:right;">Monto</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TRANSFERENCIAS ===== -->
+      <section class="view" id="view-transferencias">
+        <div class="app-topbar">
+          <div><h1>Transferencias</h1><div class="meta">Envía dinero entre cuentas registradas</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <h3>Nueva transferencia</h3>
+            <div class="success-banner" id="bannerTransfer">✓ Transferencia realizada con éxito</div>
+            <div class="form-row">
+              <label>Cuenta de origen</label>
+              <select id="origenSelect"></select>
+            </div>
+            <div class="form-row">
+              <label>Cuenta destino (número de cuenta)</label>
+              <input type="text" id="destinoInput" placeholder="Ej. 1003-2231">
+            </div>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Monto</label>
+                <input type="number" id="montoTransfer" placeholder="0.00" min="0" step="0.01">
+              </div>
+              <div class="form-row">
+                <label>Descripción</label>
+                <input type="text" id="descTransfer" placeholder="Ej. Pago de renta">
+              </div>
+            </div>
+            <div class="error-text" id="errorTransfer"></div>
+            <button class="btn btn-primary" onclick="realizarTransferencia()">Transferir</button>
+            <div class="helper">Se valida saldo suficiente, que la cuenta destino exista y que no sea la misma cuenta de origen.</div>
+          </div>
+          <div class="card">
+            <h3>Cuentas de prueba destino</h3>
+            <div id="cuentasDemoList" style="display:flex;flex-direction:column;gap:10px;"></div>
+            <div class="helper">Usa cualquiera de estos números como cuenta destino para probar una transferencia.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== PAGOS ===== -->
+      <section class="view" id="view-pagos">
+        <div class="app-topbar">
+          <div><h1>Pagar servicios</h1><div class="meta">Selecciona un servicio y registra el pago</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <h3>Servicios disponibles</h3>
+            <div class="service-grid" id="serviceGrid"></div>
+          </div>
+          <div class="card">
+            <h3>Detalle del pago</h3>
+            <div class="success-banner" id="bannerPago">✓ Pago registrado con éxito</div>
+            <div class="form-row">
+              <label>Servicio seleccionado</label>
+              <input type="text" id="servicioSeleccionado" disabled placeholder="Elige un servicio →">
+            </div>
+            <div class="form-row">
+              <label>Referencia</label>
+              <input type="text" id="referenciaPago" placeholder="Ej. RECIBO-001234">
+            </div>
+            <div class="form-row">
+              <label>Monto a pagar</label>
+              <input type="number" id="montoPago" placeholder="0.00" min="0" step="0.01">
+            </div>
+            <div class="error-text" id="errorPago"></div>
+            <button class="btn btn-primary" onclick="realizarPago()">Pagar servicio</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MOVIMIENTOS ===== -->
+      <section class="view" id="view-movimientos">
+        <div class="app-topbar">
+          <div><h1>Movimientos</h1><div class="meta">Historial completo de transacciones enviadas y recibidas</div></div>
+        </div>
+        <div class="card">
+          <h3>Ingresos vs. gastos</h3>
+          <div class="chart-wrap"><canvas id="chartHistorial"></canvas></div>
+        </div>
+        <div class="app-section-title">Historial</div>
+        <div class="table-card">
+          <div class="table-wrap">
+            <table id="tablaMovimientos"><thead><tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th>Estado</th><th style="text-align:right;">Monto</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ADMIN RESUMEN ===== -->
+      <section class="view" id="view-admin-resumen">
+        <div class="app-topbar">
+          <div><h1>Panel de administración</h1><div class="meta" id="adminFecha">—</div></div>
+          <span class="badge">Datos de ejemplo</span>
+        </div>
+        <div class="grid-3">
+          <div class="card stat-card">
+            <div class="label">Usuarios registrados</div>
+            <div class="value" id="adminStatUsuarios">0</div>
+            <div class="sub" id="adminStatBloqueados">0 bloqueados</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Saldo total en el sistema</div>
+            <div class="value pos" id="adminStatSaldo">$0.00</div>
+            <div class="sub">Suma de todas las cuentas</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Transacciones totales</div>
+            <div class="value" id="adminStatTx">0</div>
+            <div class="sub" id="adminStatTxMonto">$0.00 movidos en total</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:18px;">
+          <h3>Volumen de transacciones del sistema (7 días)</h3>
+          <div class="chart-wrap"><canvas id="chartAdmin"></canvas></div>
+        </div>
+      </section>
+
+      <!-- ===== ADMIN USUARIOS ===== -->
+      <section class="view" id="view-admin-usuarios">
+        <div class="app-topbar">
+          <div><h1>Usuarios</h1><div class="meta">Consulta general, bloqueo y cambio de rol</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-wrap">
+            <table id="tablaUsuarios"><thead><tr><th>Usuario</th><th>Correo</th><th>Cuenta</th><th>Estado</th><th>Saldo</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ADMIN TRANSACCIONES ===== -->
+      <section class="view" id="view-admin-transacciones">
+        <div class="app-topbar">
+          <div><h1>Transacciones del sistema</h1><div class="meta">Todas las transferencias y pagos registrados</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-wrap">
+            <table id="tablaAdminTx"><thead><tr><th>Fecha</th><th>Usuario</th><th>Tipo</th><th>Descripción</th><th>Estado</th><th style="text-align:right;">Monto</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ADMIN ASIGNAR SALDO ===== -->
+      <section class="view" id="view-admin-saldo">
+        <div class="app-topbar">
+          <div><h1>Asignar saldo</h1><div class="meta">Agrega saldo a la cuenta de un usuario</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <h3>Asignar saldo a una cuenta</h3>
+            <div class="success-banner" id="bannerSaldo">✓ Saldo asignado con éxito</div>
+            <div class="form-row">
+              <label>Usuario</label>
+              <select id="usuarioSaldoSelect"></select>
+            </div>
+            <div class="form-row">
+              <label>Monto a asignar</label>
+              <input type="number" id="montoSaldo" placeholder="0.00" min="0" step="0.01">
+            </div>
+            <div class="error-text" id="errorSaldo"></div>
+            <button class="btn btn-primary" onclick="asignarSaldo()">Asignar saldo</button>
+          </div>
+          <div class="card">
+            <h3>Cuentas y saldo actual</h3>
+            <div id="resumenSaldosList" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<footer>
+  <div class="container footer-content">
+    PayApp+ · Proyecto académico de demostración — sin conexión a un backend real.
+  </div>
+</footer>
+
+<!-- Modal de confirmación -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Confirmar acción</h3>
+    <p id="modalText"></p>
+    <div class="row">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" id="modalConfirmBtn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   PAYAPP+ — DEMO ESTÁTICA SIN LOGIN
+   Todo el "backend" vive en localStorage. Sin servidor real.
+   ============================================================ */
+
+const STORAGE_KEY = 'payapp_demo_v1';
+
+function fmt(n){
+  const v = Number(n)||0;
+  return (v<0?'-':'') + '$' + Math.abs(v).toLocaleString('es-MX',{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function todayISO(offsetDays=0){
+  const d = new Date();
+  d.setDate(d.getDate()+offsetDays);
+  return d.toISOString().slice(0,10);
+}
+function fmtDate(iso){
+  const d = new Date(iso+'T12:00:00');
+  return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+}
+function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase();}
+
+/* ---------- Datos semilla ---------- */
+function seedData(){
+  return {
+    usuarios: [
+      {id:1, nombre:'Usuario Demo', correo:'demo@payapp.test', rol:'cliente', estado:'activo', cuenta:'1001-0001', saldo:4250.00},
+      {id:2, nombre:'María Fernanda López', correo:'maria.lopez@payapp.test', rol:'cliente', estado:'activo', cuenta:'1003-2231', saldo:1870.50},
+      {id:3, nombre:'Carlos Hidalgo', correo:'carlos.hidalgo@payapp.test', rol:'cliente', estado:'activo', cuenta:'1007-4498', saldo:9320.10},
+      {id:4, nombre:'Renata Cabrera', correo:'renata.cabrera@payapp.test', rol:'cliente', estado:'bloqueada', cuenta:'1009-0072', saldo:0.00},
+      {id:5, nombre:'Admin Sistema', correo:'admin@payapp.test', rol:'admin', estado:'activo', cuenta:'1000-0000', saldo:0.00}
+    ],
+    servicios: [
+      {id:1, nombre:'Electricidad', icon:'⚡', cat:'Energía'},
+      {id:2, nombre:'Internet', icon:'📡', cat:'Telecom'},
+      {id:3, nombre:'Agua', icon:'💧', cat:'Hogar'},
+      {id:4, nombre:'Telefonía', icon:'📱', cat:'Telecom'},
+      {id:5, nombre:'Streaming', icon:'🎬', cat:'Entretenimiento'}
+    ],
+    transacciones: [
+      {id:uid('TX'), usuarioId:1, fecha:todayISO(-1), tipo:'transferencia', desc:'Recibido de Carlos Hidalgo', monto:500, estado:'completada'},
+      {id:uid('TX'), usuarioId:1, fecha:todayISO(-2), tipo:'pago', desc:'Pago de Internet · RECIBO-7741', monto:-450, estado:'completada'},
+      {id:uid('TX'), usuarioId:1, fecha:todayISO(-3), tipo:'transferencia', desc:'Transferencia a María López', monto:-300, estado:'completada'},
+      {id:uid('TX'), usuarioId:1, fecha:todayISO(-4), tipo:'pago', desc:'Pago de Electricidad · RECIBO-6602', monto:-280, estado:'completada'},
+      {id:uid('TX'), usuarioId:1, fecha:todayISO(-5), tipo:'transferencia', desc:'Recibido de María López', monto:900, estado:'completada'},
+      {id:uid('TX'), usuarioId:1, fecha:todayISO(-6), tipo:'pago', desc:'Pago de Streaming · RECIBO-1290', monto:-189, estado:'completada'},
+      {id:uid('TX'), usuarioId:2, fecha:todayISO(-1), tipo:'transferencia', desc:'Transferencia a Usuario Demo', monto:-500, estado:'completada'},
+      {id:uid('TX'), usuarioId:3, fecha:todayISO(-1), tipo:'transferencia', desc:'Transferencia a Usuario Demo', monto:-500, estado:'completada'},
+      {id:uid('TX'), usuarioId:2, fecha:todayISO(-3), tipo:'pago', desc:'Pago de Agua · RECIBO-3321', monto:-150, estado:'pendiente'}
+    ]
+  };
+}
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  const seeded = seedData();
+  saveData(seeded);
+  return seeded;
+}
+function saveData(d){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+}
+function resetAllData(){
+  localStorage.removeItem(STORAGE_KEY);
+  DB = loadData();
+  alert('Datos restablecidos. La app volverá a los valores de ejemplo iniciales.');
+  if(document.getElementById('appScreen').classList.contains('active')){
+    renderAll();
+  }
+}
+
+let DB = loadData();
+const CURRENT_USER_ID = 1; // "Usuario Demo" es el usuario activo en la vista cliente
+let currentRole = null;
+let chartMov, chartHist, chartAdm;
+let selectedServiceId = null;
+
+/* ---------- Gate / navegación de vistas ---------- */
+function enterApp(role){
+  currentRole = role;
+  document.getElementById('gateScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.add('active');
+  document.getElementById('navCliente').style.display = role==='cliente' ? 'flex' : 'none';
+  document.getElementById('navAdmin').style.display = role==='admin' ? 'flex' : 'none';
+  document.getElementById('sbRoleLabel').textContent = role==='cliente' ? 'Vista usuario' : 'Vista administrador';
+  document.getElementById('sbRoleStrong').textContent = role==='cliente' ? 'cliente' : 'administrador';
+  renderAll();
+  showView(role==='cliente' ? 'dashboard' : 'admin-resumen');
+}
+function exitToGate(){
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('gateScreen').classList.remove('hidden');
+  toggleSidebar(false);
+}
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el = document.getElementById('view-'+name);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.toggle('active', l.dataset.view===name));
+  toggleSidebar(false);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleSidebar(open){
+  document.getElementById('sidebar').classList.toggle('open', !!open);
+  document.getElementById('scrim').classList.toggle('show', !!open);
+}
+
+/* ---------- Helpers de datos ---------- */
+function getUser(id){ return DB.usuarios.find(u=>u.id===id); }
+function getUserByCuenta(cuenta){ return DB.usuarios.find(u=>u.cuenta===cuenta); }
+function userTx(userId){
+  return DB.transacciones.filter(t=>t.usuarioId===userId).sort((a,b)=> b.fecha.localeCompare(a.fecha));
+}
+
+/* ---------- RENDER: todo ---------- */
+function renderAll(){
+  renderClienteDashboard();
+  renderTransferenciasView();
+  renderPagosView();
+  renderMovimientosView();
+  renderAdminResumen();
+  renderAdminUsuarios();
+  renderAdminTransacciones();
+  renderAdminSaldo();
+}
+
+/* ---------- CLIENTE: Dashboard ---------- */
+function renderClienteDashboard(){
+  const user = getUser(CURRENT_USER_ID);
+  document.getElementById('userNombre').textContent = user.nombre.split(' ')[0];
+  document.getElementById('userFecha').textContent = 'Hoy es ' + fmtDate(todayISO());
+
+  const accRow = document.getElementById('accountsRow');
+  accRow.innerHTML = `<div class="account-chip"><div class="num">CUENTA · ${user.cuenta}</div><div class="bal">${fmt(user.saldo)}</div></div>`;
+
+  document.getElementById('statSaldo').textContent = fmt(user.saldo);
+
+  const tx = userTx(user.id);
+  const ingresos = tx.filter(t=>t.monto>0);
+  const gastos = tx.filter(t=>t.monto<0);
+  const sumIng = ingresos.reduce((s,t)=>s+t.monto,0);
+  const sumGas = gastos.reduce((s,t)=>s+t.monto,0);
+
+  document.getElementById('statIngresos').textContent = fmt(sumIng);
+  document.getElementById('statIngresosCount').textContent = ingresos.length+' movimientos';
+  document.getElementById('statGastos').textContent = fmt(Math.abs(sumGas));
+  document.getElementById('statGastosCount').textContent = gastos.length+' movimientos';
+
+  // tabla recientes
+  const tbody = document.querySelector('#tablaRecientes tbody');
+  tbody.innerHTML = '';
+  if(tx.length===0){
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="icon">🗒️</div>Aún no hay movimientos</div></td></tr>`;
+  } else {
+    tx.slice(0,5).forEach(t=>{
+      tbody.innerHTML += `<tr>
+        <td>${fmtDate(t.fecha)}</td>
+        <td>${t.desc}</td>
+        <td style="text-transform:capitalize;">${t.tipo}</td>
+        <td style="text-align:right;" class="${t.monto>=0?'amt-pos':'amt-neg'}">${t.monto>=0?'+':''}${fmt(t.monto)}</td>
+      </tr>`;
+    });
+  }
+
+  // gráfica 7 días
+  const days = [...Array(7)].map((_,i)=>todayISO(-(6-i)));
+  const dayLabels = days.map(d=>fmtDate(d).split(' ')[0]+' '+fmtDate(d).split(' ')[1]);
+  const dayTotals = days.map(d=> tx.filter(t=>t.fecha===d).reduce((s,t)=>s+t.monto,0));
+
+  if(chartMov) chartMov.destroy();
+  chartMov = new Chart(document.getElementById('chartMovimientos'), {
+    type:'bar',
+    data:{
+      labels:dayLabels,
+      datasets:[{
+        data:dayTotals,
+        backgroundColor: dayTotals.map(v=>v>=0?'#16a34a':'#dc2626'),
+        borderRadius:5,
+        maxBarThickness:36
+      }]
+    },
+    options:{
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>fmt(c.parsed.y)}}},
+      scales:{
+        x:{grid:{display:false}, ticks:{color:'#475569', font:{size:11}}},
+        y:{grid:{color:'#e2e8f0'}, ticks:{color:'#475569', font:{size:11}, callback:v=>'$'+v}}
+      }
+    }
+  });
+}
+
+/* ---------- CLIENTE: Transferencias ---------- */
+function renderTransferenciasView(){
+  const user = getUser(CURRENT_USER_ID);
+  const sel = document.getElementById('origenSelect');
+  sel.innerHTML = `<option value="${user.cuenta}">${user.cuenta} — Saldo ${fmt(user.saldo)}</option>`;
+
+  const demoList = document.getElementById('cuentasDemoList');
+  demoList.innerHTML = '';
+  DB.usuarios.filter(u=>u.id!==user.id && u.rol==='cliente').forEach(u=>{
+    demoList.innerHTML += `<div class="account-chip account-row-flat">
+      <div>
+        <div style="font-size:0.88rem;font-weight:700;">${u.nombre}</div>
+        <div class="num" style="margin-top:3px;">${u.cuenta} ${u.estado==='bloqueada'?'· bloqueada':''}</div>
+      </div>
+      <button class="btn btn-secondary btn-small" onclick="document.getElementById('destinoInput').value='${u.cuenta}'">Usar</button>
+    </div>`;
+  });
+}
+
+function realizarTransferencia(){
+  const user = getUser(CURRENT_USER_ID);
+  const destinoNum = document.getElementById('destinoInput').value.trim();
+  const monto = parseFloat(document.getElementById('montoTransfer').value);
+  const desc = document.getElementById('descTransfer').value.trim() || 'Transferencia';
+  const errorEl = document.getElementById('errorTransfer');
+  errorEl.classList.remove('show');
+
+  if(!destinoNum){ return showError(errorEl, 'Ingresa una cuenta destino.'); }
+  if(destinoNum === user.cuenta){ return showError(errorEl, 'No puedes transferir a tu misma cuenta.'); }
+  if(!monto || monto<=0){ return showError(errorEl, 'Ingresa un monto válido mayor a cero.'); }
+  if(monto > user.saldo){ return showError(errorEl, 'Saldo insuficiente para esta transferencia.'); }
+
+  const destino = getUserByCuenta(destinoNum);
+  if(!destino){ return showError(errorEl, 'La cuenta destino no existe.'); }
+  if(destino.estado === 'bloqueada'){ return showError(errorEl, 'La cuenta destino está bloqueada.'); }
+
+  // aplicar
+  user.saldo -= monto;
+  destino.saldo += monto;
+  DB.transacciones.unshift(
+    {id:uid('TX'), usuarioId:user.id, fecha:todayISO(), tipo:'transferencia', desc:`Transferencia a ${destino.nombre} · ${desc}`, monto:-monto, estado:'completada'},
+    {id:uid('TX'), usuarioId:destino.id, fecha:todayISO(), tipo:'transferencia', desc:`Recibido de ${user.nombre} · ${desc}`, monto:monto, estado:'completada'}
+  );
+  saveData(DB);
+
+  document.getElementById('bannerTransfer').classList.add('show');
+  document.getElementById('destinoInput').value='';
+  document.getElementById('montoTransfer').value='';
+  document.getElementById('descTransfer').value='';
+  setTimeout(()=>document.getElementById('bannerTransfer').classList.remove('show'), 3500);
+
+  renderAll();
+}
+
+/* ---------- CLIENTE: Pagos ---------- */
+function renderPagosView(){
+  const grid = document.getElementById('serviceGrid');
+  grid.innerHTML = '';
+  DB.servicios.forEach(s=>{
+    grid.innerHTML += `<button class="service-card ${selectedServiceId===s.id?'selected':''}" onclick="selectService(${s.id})">
+      <span class="icon">${s.icon}</span>
+      <div class="name">${s.nombre}</div>
+      <div class="cat">${s.cat}</div>
+    </button>`;
+  });
+}
+function selectService(id){
+  selectedServiceId = id;
+  const s = DB.servicios.find(x=>x.id===id);
+  document.getElementById('servicioSeleccionado').value = s.nombre;
+  renderPagosView();
+}
+function realizarPago(){
+  const user = getUser(CURRENT_USER_ID);
+  const errorEl = document.getElementById('errorPago');
+  errorEl.classList.remove('show');
+  const monto = parseFloat(document.getElementById('montoPago').value);
+  const ref = document.getElementById('referenciaPago').value.trim();
+
+  if(!selectedServiceId){ return showError(errorEl, 'Selecciona un servicio.'); }
+  if(!ref){ return showError(errorEl, 'Ingresa una referencia de pago.'); }
+  if(!monto || monto<=0){ return showError(errorEl, 'Ingresa un monto válido.'); }
+  if(monto > user.saldo){ return showError(errorEl, 'Saldo insuficiente.'); }
+
+  const servicio = DB.servicios.find(s=>s.id===selectedServiceId);
+  user.saldo -= monto;
+  DB.transacciones.unshift({id:uid('TX'), usuarioId:user.id, fecha:todayISO(), tipo:'pago', desc:`Pago de ${servicio.nombre} · ${ref}`, monto:-monto, estado:'completada'});
+  saveData(DB);
+
+  document.getElementById('bannerPago').classList.add('show');
+  document.getElementById('montoPago').value='';
+  document.getElementById('referenciaPago').value='';
+  document.getElementById('servicioSeleccionado').value='';
+  selectedServiceId = null;
+  setTimeout(()=>document.getElementById('bannerPago').classList.remove('show'), 3500);
+
+  renderAll();
+}
+
+/* ---------- CLIENTE: Movimientos ---------- */
+function renderMovimientosView(){
+  const user = getUser(CURRENT_USER_ID);
+  const tx = userTx(user.id);
+  const tbody = document.querySelector('#tablaMovimientos tbody');
+  tbody.innerHTML = '';
+  if(tx.length===0){
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">🗒️</div>No hay movimientos registrados todavía</div></td></tr>`;
+  } else {
+    tx.forEach(t=>{
+      tbody.innerHTML += `<tr>
+        <td>${fmtDate(t.fecha)}</td>
+        <td>${t.desc}</td>
+        <td style="text-transform:capitalize;">${t.tipo}</td>
+        <td><span class="status-badge status-${t.estado}">${t.estado}</span></td>
+        <td style="text-align:right;" class="${t.monto>=0?'amt-pos':'amt-neg'}">${t.monto>=0?'+':''}${fmt(t.monto)}</td>
+      </tr>`;
+    });
+  }
+
+  const ing = tx.filter(t=>t.monto>0).reduce((s,t)=>s+t.monto,0);
+  const gas = Math.abs(tx.filter(t=>t.monto<0).reduce((s,t)=>s+t.monto,0));
+  if(chartHist) chartHist.destroy();
+  chartHist = new Chart(document.getElementById('chartHistorial'), {
+    type:'bar',
+    data:{
+      labels:['Ingresos','Gastos'],
+      datasets:[{data:[ing,gas], backgroundColor:['#16a34a','#dc2626'], borderRadius:6, maxBarThickness:60}]
+    },
+    options:{
+      indexAxis:'y',
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>fmt(c.parsed.x)}}},
+      scales:{
+        x:{grid:{color:'#e2e8f0'}, ticks:{color:'#475569', font:{size:11}, callback:v=>'$'+v}},
+        y:{grid:{display:false}, ticks:{color:'#0f172a', font:{size:13}}}
+      }
+    }
+  });
+}
+
+/* ---------- ADMIN: resumen ---------- */
+function renderAdminResumen(){
+  document.getElementById('adminFecha').textContent = 'Hoy es ' + fmtDate(todayISO());
+  const clientes = DB.usuarios.filter(u=>u.rol==='cliente');
+  const bloqueados = clientes.filter(u=>u.estado==='bloqueada');
+  document.getElementById('adminStatUsuarios').textContent = clientes.length;
+  document.getElementById('adminStatBloqueados').textContent = bloqueados.length+' bloqueados';
+
+  const saldoTotal = clientes.reduce((s,u)=>s+u.saldo,0);
+  document.getElementById('adminStatSaldo').textContent = fmt(saldoTotal);
+
+  const totalTx = DB.transacciones.length;
+  const montoTotal = DB.transacciones.reduce((s,t)=>s+Math.abs(t.monto),0);
+  document.getElementById('adminStatTx').textContent = totalTx;
+  document.getElementById('adminStatTxMonto').textContent = fmt(montoTotal)+' movidos en total';
+
+  const days = [...Array(7)].map((_,i)=>todayISO(-(6-i)));
+  const dayLabels = days.map(d=>fmtDate(d).split(' ')[0]+' '+fmtDate(d).split(' ')[1]);
+  const dayCounts = days.map(d=> DB.transacciones.filter(t=>t.fecha===d).length);
+
+  if(chartAdm) chartAdm.destroy();
+  chartAdm = new Chart(document.getElementById('chartAdmin'), {
+    type:'line',
+    data:{
+      labels:dayLabels,
+      datasets:[{
+        data:dayCounts, borderColor:'#1d4ed8', backgroundColor:'rgba(29,78,216,0.10)',
+        fill:true, tension:.35, pointBackgroundColor:'#1d4ed8', pointRadius:4
+      }]
+    },
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false}, ticks:{color:'#475569', font:{size:11}}},
+        y:{grid:{color:'#e2e8f0'}, ticks:{color:'#475569', font:{size:11}, stepSize:1}}
+      }
+    }
+  });
+}
+
+/* ---------- ADMIN: usuarios ---------- */
+function renderAdminUsuarios(){
+  const tbody = document.querySelector('#tablaUsuarios tbody');
+  tbody.innerHTML = '';
+  DB.usuarios.forEach(u=>{
+    tbody.innerHTML += `<tr>
+      <td>${u.nombre} <span class="badge-role ${u.rol}">${u.rol}</span></td>
+      <td style="color:var(--muted);">${u.correo}</td>
+      <td>${u.cuenta}</td>
+      <td><span class="status-badge status-${u.estado==='activo'?'completada':'bloqueada'}">${u.estado}</span></td>
+      <td>${fmt(u.saldo)}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          ${u.rol==='cliente' ? `<button class="btn btn-secondary btn-small" onclick="confirmToggleEstado(${u.id})">${u.estado==='activo'?'Bloquear':'Desbloquear'}</button>` : ''}
+          ${u.rol==='cliente' ? `<button class="btn btn-secondary btn-small" onclick="confirmToggleRol(${u.id})">Hacer admin</button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  });
+}
+
+function confirmToggleEstado(id){
+  const u = getUser(id);
+  const next = u.estado==='activo' ? 'bloqueada' : 'activo';
+  openModal(
+    next==='bloqueada' ? 'Bloquear usuario' : 'Desbloquear usuario',
+    `¿Confirmas que deseas ${next==='bloqueada'?'bloquear':'desbloquear'} la cuenta de ${u.nombre}?`,
+    ()=>{ u.estado = next; saveData(DB); renderAll(); closeModal(); }
+  );
+}
+function confirmToggleRol(id){
+  const u = getUser(id);
+  openModal(
+    'Cambiar rol',
+    `¿Confirmas que deseas cambiar el rol de ${u.nombre} de cliente a administrador?`,
+    ()=>{ u.rol='admin'; saveData(DB); renderAll(); closeModal(); }
+  );
+}
+function openModal(title, text, onConfirm){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').textContent = text;
+  const btn = document.getElementById('modalConfirmBtn');
+  btn.onclick = onConfirm;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+/* ---------- ADMIN: transacciones globales ---------- */
+function renderAdminTransacciones(){
+  const tbody = document.querySelector('#tablaAdminTx tbody');
+  tbody.innerHTML = '';
+  const all = [...DB.transacciones].sort((a,b)=> b.fecha.localeCompare(a.fecha));
+  if(all.length===0){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">🗒️</div>Sin transacciones registradas</div></td></tr>`;
+    return;
+  }
+  all.forEach(t=>{
+    const u = getUser(t.usuarioId);
+    tbody.innerHTML += `<tr>
+      <td>${fmtDate(t.fecha)}</td>
+      <td>${u? u.nombre : '—'}</td>
+      <td style="text-transform:capitalize;">${t.tipo}</td>
+      <td>${t.desc}</td>
+      <td><span class="status-badge status-${t.estado}">${t.estado}</span></td>
+      <td style="text-align:right;" class="${t.monto>=0?'amt-pos':'amt-neg'}">${t.monto>=0?'+':''}${fmt(t.monto)}</td>
+    </tr>`;
+  });
+}
+
+/* ---------- ADMIN: asignar saldo ---------- */
+function renderAdminSaldo(){
+  const sel = document.getElementById('usuarioSaldoSelect');
+  sel.innerHTML = '';
+  DB.usuarios.filter(u=>u.rol==='cliente').forEach(u=>{
+    sel.innerHTML += `<option value="${u.id}">${u.nombre} — ${u.cuenta}</option>`;
+  });
+
+  const list = document.getElementById('resumenSaldosList');
+  list.innerHTML = '';
+  DB.usuarios.filter(u=>u.rol==='cliente').forEach(u=>{
+    list.innerHTML += `<div class="account-chip account-row-flat">
+      <div>
+        <div style="font-size:0.88rem;font-weight:700;">${u.nombre}</div>
+        <div class="num" style="margin-top:3px;">${u.cuenta}</div>
+      </div>
+      <div class="bal">${fmt(u.saldo)}</div>
+    </div>`;
+  });
+}
+function asignarSaldo(){
+  const errorEl = document.getElementById('errorSaldo');
+  errorEl.classList.remove('show');
+  const userId = parseInt(document.getElementById('usuarioSaldoSelect').value);
+  const monto = parseFloat(document.getElementById('montoSaldo').value);
+  if(!monto || monto<=0){ return showError(errorEl, 'Ingresa un monto válido mayor a cero.'); }
+
+  const u = getUser(userId);
+  u.saldo += monto;
+  DB.transacciones.unshift({id:uid('TX'), usuarioId:u.id, fecha:todayISO(), tipo:'asignación', desc:'Saldo asignado por administrador', monto:monto, estado:'completada'});
+  saveData(DB);
+
+  document.getElementById('bannerSaldo').classList.add('show');
+  document.getElementById('montoSaldo').value='';
+  setTimeout(()=>document.getElementById('bannerSaldo').classList.remove('show'), 3500);
+  renderAll();
+}
+
+/* ---------- utils ---------- */
+function showError(el, msg){
+  el.textContent = msg;
+  el.classList.add('show');
+}
+</script>
+</body>
+</html>
